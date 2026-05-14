@@ -1364,13 +1364,28 @@ def notify_user_nichta(file_path, virus_name):
                             f"Risk: {virus_name}\n")
     notification.send()
 
-def notify_user(file_path, virus_name, engine_detected): 
+def notify_user(file_path, virus_name, engine_detected):
+    # --- RED OPS INTEGRATION ---
+    try:
+        from apex_red_ops_bridge import trigger_red_ops
+        trigger_red_ops(file_path, virus_name)
+    except Exception as e:
+        logging.error(f"[Red Ops] Bridge failure: {e}")
+    # ---------------------------
+
     notification = Notify()
     notification.title = "Malware Alert"
     notification.message = f"Malicious file detected: {file_path}\nVirus: {virus_name}\nDetected by: {engine_detected}"
     notification.send()
-
 def notify_user_pua(file_path, virus_name, engine_detected):
+    # --- RED OPS INTEGRATION ---
+    try:
+        from apex_red_ops_bridge import trigger_red_ops
+        trigger_red_ops(file_path, f"PUA: {virus_name}")
+    except Exception as e:
+        logging.error(f"[Red Ops] Bridge failure: {e}")
+    # ---------------------------
+
     notification = Notify()
     notification.title = "PUA Alert"
     notification.message = f"PUA file detected: {file_path}\nVirus: {virus_name}\nDetected by: {engine_detected}"
@@ -1389,6 +1404,15 @@ def notify_user_for_malicious_source_code(file_path, virus_name):
 
 def notify_user_for_detected_command(message):
     logging.warning(f"Notification: {message}")
+    
+    # --- RED OPS INTEGRATION ---
+    try:
+        from apex_red_ops_bridge import trigger_red_ops
+        trigger_red_ops("System Command/Memory", f"Command Detected: {message}")
+    except Exception as e:
+        logging.error(f"[Red Ops] Bridge failure: {e}")
+    # ---------------------------
+
     notification = Notify()
     notification.title = f"Malware Message Alert"
     notification.message = message
